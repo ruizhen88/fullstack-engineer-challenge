@@ -8,7 +8,18 @@ import { getMatchingEnumValueByString } from "./utils";
 
 const prisma = new PrismaClient();
 
-const findPolicies = async (search: any) => {
+// TODO: move it to a separate file
+export const ITEMS_PER_PAGE = 5;
+
+const getPolicyCount = async () => {
+  const aggregations = await prisma.policy.aggregate({ _count: true });
+  return aggregations._count;
+};
+
+const findPolicies = async (
+  search: string | undefined,
+  skip: number | undefined
+) => {
   const or: Prisma.PolicyWhereInput = search
     ? {
         OR: [
@@ -57,9 +68,11 @@ const findPolicies = async (search: any) => {
         },
       },
     },
+    skip,
+    take: ITEMS_PER_PAGE,
   });
 
   return policies;
 };
 
-export default { findPolicies };
+export default { findPolicies, getPolicyCount };
