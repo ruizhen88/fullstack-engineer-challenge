@@ -12,10 +12,8 @@ const prisma = new PrismaClient();
 export const ITEMS_PER_PAGE = 5;
 
 const getPolicyCount = async () => {
-  const aggregations = await prisma.policy.aggregate({
-    _count: true,
-  });
-  return aggregations;
+  const aggregations = await prisma.policy.aggregate({ _count: true });
+  return aggregations._count;
 };
 
 const findPolicies = async (
