@@ -5,7 +5,7 @@ const getPolicies = async (req: Request, res: Response, next: NextFunction) => {
   let policies;
   try {
     const { search, page } = req.query;
-    const skip = page ? parseInt(page as string, 10) * 5 : undefined;
+    const skip = page ? (parseInt(page as string, 10) - 1) * 5 : undefined;
 
     policies = await service.findPolicies(search as string, skip as number);
     const totalCount = await service.getPolicyCount();
