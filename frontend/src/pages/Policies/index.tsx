@@ -11,16 +11,13 @@ const Policies = () => {
   const [rowData, setRowData] = useState<Policy[]>([]);
   const [isLoading, setLoading] = useState(false);
   const [hasError, setError] = useState(false);
-  const [page, setPage] = useState(1);
-  const [totalPage, setTotalPage] = useState(0);
+  const [totalPage, setTotalPage] = useState(1);
 
   const fetchPolicies = useCallback(async (params) => {
-    let data: Policy[] = [];
+    let data = { totalPage: 1, policies: [] };
     try {
       const response = await axios.get("/policies", { params });
-      const totalPage = response.data.totalPage;
-      setTotalPage(totalPage);
-      data = response.data.policies;
+      data = response.data;
     } catch (err: any) {
       setError(true);
     }
@@ -34,28 +31,33 @@ const Policies = () => {
     setRowData(dataToDisplay);
   };
 
-  const getTableData = useCallback(async (params = {}) => {
-    setLoading(true);
-    const data = await fetchPolicies(params);
-    handleDataToDisplay(data);
-    setLoading(false);
-  }, []);
+  const getTableData = useCallback(
+    async (params = {}) => {
+      setLoading(true);
+      const data = await fetchPolicies(params);
+      // Disabling status filter for now to get correct paginated result
+      // handleDataToDisplay(data);
+      setTotalPage(data.totalPage);
+      setRowData(data.policies);
+      setLoading(false);
+    },
+    [fetchPolicies]
+  );
 
   useEffect(() => {
-    // getTableData();
-    const getData = async () => {
-      const data = await fetchPolicies({ page });
-      handleDataToDisplay(data);
-    };
-    getData();
-  }, [page, fetchPolicies]);
+    getTableData();
+  }, [getTableData]);
+
+  const handlePageChange = (page: number) => {
+    getTableData({ page });
+  };
 
   return (
     <div className="w-full p-8">
       <Header />
       <Search onSearch={getTableData} onClear={getTableData} />
       <Table rowData={rowData} isLoading={isLoading} hasError={hasError} />
-      <Pagination onPageClick={setPage} totalPage={totalPage} />
+      <Pagination onPageClick={handlePageChange} totalPage={totalPage} />
     </div>
   );
 };
